@@ -1,0 +1,1004 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/admin/booking/stats": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get stats for booking creations. Avaliable only for ADMINs",
+                "tags": [
+                    "Booking"
+                ],
+                "summary": "Get stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Parametr for stats specify. Must be 'day', 'week' or 'month'",
+                        "name": "filter",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful get of stats",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Stats"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid role",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/booking/{id}/access": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Check status of user booking or invitation for nearest 12 hours. Avaliable only for ADMINs",
+                "tags": [
+                    "Booking"
+                ],
+                "summary": "Check user access",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "User id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful check access. Status can has value READY, NOT_READY or PENDING",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BookingAccess"
+                        }
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid role",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/booking/{id}/guests": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get invites of room.",
+                "tags": [
+                    "Guests"
+                ],
+                "summary": "Get invites",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Booking id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfull get",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.Guest"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Not your booking",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Create invite to room.",
+                "tags": [
+                    "Guests"
+                ],
+                "summary": "Create invite",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Booking id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "User Email",
+                        "name": "Email",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.GuestId"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successfull invite"
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Not your booking",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/booking/{id}/guests/{email}": {
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Delete invite to room.",
+                "tags": [
+                    "Guests"
+                ],
+                "summary": "Delete invite",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Booking id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Email",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfull get",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.Guest"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Not your booking",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/layout/entities/{id}": {
+            "get": {
+                "description": "Get entity by id",
+                "tags": [
+                    "Entity"
+                ],
+                "summary": "Get entity by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Entity id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/dto.BookingEntity"
+                        }
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid role",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/layout/floors": {
+            "get": {
+                "description": "Get list of floor",
+                "tags": [
+                    "Entity"
+                ],
+                "summary": "Get floors",
+                "responses": {
+                    "200": {
+                        "description": "Succesful get of floors",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.FloorEntity"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Save layout. Only for ADMINs",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Entity"
+                ],
+                "summary": "Save layout",
+                "parameters": [
+                    {
+                        "description": "Upsert data",
+                        "name": "upsert",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpsertFloor"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Message"
+                        }
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid role",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/layout/floors/{id}": {
+            "get": {
+                "description": "Get entities for floor",
+                "tags": [
+                    "Entity"
+                ],
+                "summary": "Get entities for floor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Floor id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful get entities",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.BookingEntity"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete floor. Only for ADMINs",
+                "tags": [
+                    "Entity"
+                ],
+                "summary": "Delete floor",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Floor id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful delete"
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid role",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/orders": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Get orders with pagination and filters. Only for ADMINs.",
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get orders",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size",
+                        "name": "size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Completed. Complteted must be 'true', 'false' or ''",
+                        "name": "completed",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Succesfull get of orders",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Orders"
+                        }
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid role",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/orders/stats": {
+            "get": {
+                "description": "Get stats of order creations. Only for ADMINs.",
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Get stats",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Filter",
+                        "name": "filter",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Stats"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/orders/{id}": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Set order. Only for ADMINs",
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Set order completed",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful set order status"
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/verification/{id}/check": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns user verification data. Only for ADMINs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Verification"
+                ],
+                "summary": "Check verification",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "User id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/dto.VerificationData"
+                        }
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid role",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/verification/{id}/set": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Set user verification data. Only for ADMINs",
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "tags": [
+                    "Verification"
+                ],
+                "summary": "Set verification",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "User id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "passport image",
+                        "name": "passport",
+                        "in": "formData"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful setup of verification data."
+                    },
+                    "400": {
+                        "description": "Id must be uuid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "403": {
+                        "description": "Invalid role",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.BookingAccess": {
+            "type": "object",
+            "properties": {
+                "booking_id": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BookingEntity": {
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "type": "integer"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "height": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/types.BookingType"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "integer"
+                },
+                "y": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.Entity": {
+            "type": "object",
+            "properties": {
+                "capacity": {
+                    "type": "integer"
+                },
+                "floor_id": {
+                    "type": "string"
+                },
+                "height": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/types.BookingType"
+                },
+                "width": {
+                    "type": "integer"
+                },
+                "x": {
+                    "type": "integer"
+                },
+                "y": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.FloorEntity": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Guest": {
+            "type": "object",
+            "properties": {
+                "booking_id": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.GuestId": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Order": {
+            "type": "object",
+            "properties": {
+                "booking_id": {
+                    "type": "string"
+                },
+                "booking_title": {
+                    "type": "string"
+                },
+                "completed": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "thing": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.Orders": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "orders": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Order"
+                    }
+                }
+            }
+        },
+        "dto.Stats": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UpsertFloor": {
+            "type": "object",
+            "properties": {
+                "entities": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Entity"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.VerificationData": {
+            "type": "object",
+            "properties": {
+                "passport": {
+                    "type": "string"
+                },
+                "verified": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "resp.JsonError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "resp.Message": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "types.BookingType": {
+            "type": "string",
+            "enum": [
+                "ROOM",
+                "OPEN_SPACE"
+            ],
+            "x-enum-varnames": [
+                "ROOM",
+                "OPENSPACE"
+            ]
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

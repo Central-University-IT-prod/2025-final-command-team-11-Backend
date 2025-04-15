@@ -1,0 +1,702 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/id/account/": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns user own account.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Retrieve user own account",
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Account"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "404": {
+                        "description": "This user wasn`t found.",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/id/account/all": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "List of users with pagination. Only for ADMIN",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Get list of users",
+                "parameters": [
+                    {
+                        "description": "User update data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUser"
+                        }
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.Account"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Incorrect data.",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "404": {
+                        "description": "This user wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "409": {
+                        "description": "User with this email already exists",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/id/account/edit": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Updates the user's information including password.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Update user information",
+                "parameters": [
+                    {
+                        "description": "User update data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated.",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Account"
+                        }
+                    },
+                    "400": {
+                        "description": "Incorrect data.",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "404": {
+                        "description": "This user wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "409": {
+                        "description": "User with this email already exists",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/id/account/email/{email}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns user information based on their Email.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Retrieve user by Email",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "email",
+                        "description": "user email",
+                        "name": "email",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Account"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid email",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "404": {
+                        "description": "This user wasn`t found.",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/id/account/new": {
+            "post": {
+                "description": "Creates a new user and returns access tokens.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Create User",
+                "parameters": [
+                    {
+                        "description": "Data for creating a user",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateUser"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Successful response with token",
+                        "schema": {
+                            "$ref": "#/definitions/dto.AccountAnswer"
+                        }
+                    },
+                    "400": {
+                        "description": "Incorrect data",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "409": {
+                        "description": "User with this email already exist",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/id/account/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Returns user information based on their ID.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Retrieve user by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Account"
+                        }
+                    },
+                    "400": {
+                        "description": "ID must be integer",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "404": {
+                        "description": "This user wasn`t found.",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/id/account/{id}/edit": {
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Updates the user's information including password. For admin",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Account"
+                ],
+                "summary": "Update user information",
+                "parameters": [
+                    {
+                        "description": "User update data",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateUser"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "user id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated.",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Account"
+                        }
+                    },
+                    "400": {
+                        "description": "Incorrect data.",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauth",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "404": {
+                        "description": "This user wasn't found",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "409": {
+                        "description": "User with this email already exists",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/id/auth/login": {
+            "post": {
+                "description": "Logs in a user with email and password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Log in a user",
+                "parameters": [
+                    {
+                        "description": "Login information",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.Login"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Access token",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Token"
+                        }
+                    },
+                    "400": {
+                        "description": "Incorrect data",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "401": {
+                        "description": "Incorrect email or password",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "404": {
+                        "description": "This user wasn't found.",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/id/auth/logout": {
+            "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "Logs out a user by invalidating the session",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Log out a user",
+                "responses": {
+                    "200": {
+                        "description": "Logout success.",
+                        "schema": {
+                            "$ref": "#/definitions/resp.Message"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        },
+        "/id/auth/refresh": {
+            "get": {
+                "description": "Refreshes the user's tokens using the refresh token from the cookie",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh user tokens",
+                "responses": {
+                    "200": {
+                        "description": "Refresh token",
+                        "schema": {
+                            "$ref": "#/definitions/dto.Token"
+                        }
+                    },
+                    "401": {
+                        "description": "Token is invalid",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "404": {
+                        "description": "Your token wasn't found., This user wasn't found.",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    },
+                    "500": {
+                        "description": "Something going wrong...",
+                        "schema": {
+                            "$ref": "#/definitions/resp.JsonError"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dto.Account": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AccountAnswer": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.CreateUser": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 2
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 8
+                }
+            }
+        },
+        "dto.Login": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 8
+                }
+            }
+        },
+        "dto.Token": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.UpdateUser": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "maxLength": 30,
+                    "minLength": 2
+                },
+                "oldPassword": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 8
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 8
+                }
+            }
+        },
+        "resp.JsonError": {
+            "type": "object",
+            "properties": {
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
+        "resp.Message": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
+        }
+    }
+}

@@ -1,0 +1,25 @@
+FROM golang:alpine AS builder
+
+EXPOSE 80
+
+WORKDIR /usr/local/src
+
+COPY ["go.mod", "go.sum", "./"]
+
+RUN ["go", "mod", "download"]
+
+COPY ./ ./
+
+RUN ["go", "build", "-o", "./bin/coffee-id", "./cmd/coffee-id"]
+
+FROM alpine AS runner
+
+COPY --from=builder /usr/local/src/bin/coffee-id ./
+
+COPY ./config ./config
+
+COPY ./migrations ./migrations
+
+COPY .env .env
+
+CMD [ "./coffee-id" ]

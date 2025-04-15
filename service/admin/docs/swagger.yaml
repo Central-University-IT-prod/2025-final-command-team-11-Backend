@@ -1,0 +1,653 @@
+definitions:
+  dto.BookingAccess:
+    properties:
+      booking_id:
+        type: string
+      status:
+        type: string
+    type: object
+  dto.BookingEntity:
+    properties:
+      capacity:
+        type: integer
+      created_at:
+        type: string
+      height:
+        type: integer
+      id:
+        type: string
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/types.BookingType'
+      updated_at:
+        type: string
+      width:
+        type: integer
+      x:
+        type: integer
+      "y":
+        type: integer
+    type: object
+  dto.Entity:
+    properties:
+      capacity:
+        type: integer
+      floor_id:
+        type: string
+      height:
+        type: integer
+      id:
+        type: string
+      title:
+        type: string
+      type:
+        $ref: '#/definitions/types.BookingType'
+      width:
+        type: integer
+      x:
+        type: integer
+      "y":
+        type: integer
+    type: object
+  dto.FloorEntity:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dto.Guest:
+    properties:
+      booking_id:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+    type: object
+  dto.GuestId:
+    properties:
+      email:
+        type: string
+    type: object
+  dto.Order:
+    properties:
+      booking_id:
+        type: string
+      booking_title:
+        type: string
+      completed:
+        type: boolean
+      created_at:
+        type: string
+      id:
+        type: string
+      thing:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  dto.Orders:
+    properties:
+      count:
+        type: integer
+      orders:
+        items:
+          $ref: '#/definitions/dto.Order'
+        type: array
+    type: object
+  dto.Stats:
+    properties:
+      count:
+        type: integer
+    type: object
+  dto.UpsertFloor:
+    properties:
+      entities:
+        items:
+          $ref: '#/definitions/dto.Entity'
+        type: array
+      id:
+        type: string
+      name:
+        type: string
+    type: object
+  dto.VerificationData:
+    properties:
+      passport:
+        type: string
+      verified:
+        type: boolean
+    type: object
+  resp.JsonError:
+    properties:
+      error:
+        type: string
+    type: object
+  resp.Message:
+    properties:
+      message:
+        type: string
+    type: object
+  types.BookingType:
+    enum:
+    - ROOM
+    - OPEN_SPACE
+    type: string
+    x-enum-varnames:
+    - ROOM
+    - OPENSPACE
+info:
+  contact: {}
+paths:
+  /admin/booking/{id}/access:
+    get:
+      description: Check status of user booking or invitation for nearest 12 hours.
+        Avaliable only for ADMINs
+      parameters:
+      - description: User id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Successful check access. Status can has value READY, NOT_READY
+            or PENDING
+          schema:
+            $ref: '#/definitions/dto.BookingAccess'
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Invalid role
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      security:
+      - Bearer: []
+      summary: Check user access
+      tags:
+      - Booking
+  /admin/booking/{id}/guests:
+    get:
+      description: Get invites of room.
+      parameters:
+      - description: Booking id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Successfull get
+          schema:
+            items:
+              $ref: '#/definitions/dto.Guest'
+            type: array
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Not your booking
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      security:
+      - Bearer: []
+      summary: Get invites
+      tags:
+      - Guests
+    post:
+      description: Create invite to room.
+      parameters:
+      - description: Booking id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: User Email
+        in: body
+        name: Email
+        required: true
+        schema:
+          $ref: '#/definitions/dto.GuestId'
+      responses:
+        "204":
+          description: Successfull invite
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Not your booking
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      security:
+      - Bearer: []
+      summary: Create invite
+      tags:
+      - Guests
+  /admin/booking/{id}/guests/{email}:
+    delete:
+      description: Delete invite to room.
+      parameters:
+      - description: Booking id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Email
+        format: email
+        in: path
+        name: email
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Successfull get
+          schema:
+            items:
+              $ref: '#/definitions/dto.Guest'
+            type: array
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Not your booking
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      security:
+      - Bearer: []
+      summary: Delete invite
+      tags:
+      - Guests
+  /admin/booking/stats:
+    get:
+      description: Get stats for booking creations. Avaliable only for ADMINs
+      parameters:
+      - description: Parametr for stats specify. Must be 'day', 'week' or 'month'
+        in: query
+        name: filter
+        type: string
+      responses:
+        "200":
+          description: Successful get of stats
+          schema:
+            $ref: '#/definitions/dto.Stats'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Invalid role
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      security:
+      - Bearer: []
+      summary: Get stats
+      tags:
+      - Booking
+  /admin/layout/entities/{id}:
+    get:
+      description: Get entity by id
+      parameters:
+      - description: Entity id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/dto.BookingEntity'
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Invalid role
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      summary: Get entity by id
+      tags:
+      - Entity
+  /admin/layout/floors:
+    get:
+      description: Get list of floor
+      responses:
+        "200":
+          description: Succesful get of floors
+          schema:
+            items:
+              $ref: '#/definitions/dto.FloorEntity'
+            type: array
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      summary: Get floors
+      tags:
+      - Entity
+    post:
+      consumes:
+      - application/json
+      description: Save layout. Only for ADMINs
+      parameters:
+      - description: Upsert data
+        in: body
+        name: upsert
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpsertFloor'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/resp.Message'
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Invalid role
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      summary: Save layout
+      tags:
+      - Entity
+  /admin/layout/floors/{id}:
+    delete:
+      description: Delete floor. Only for ADMINs
+      parameters:
+      - description: Floor id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Successful delete
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Invalid role
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      summary: Delete floor
+      tags:
+      - Entity
+    get:
+      description: Get entities for floor
+      parameters:
+      - description: Floor id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Successful get entities
+          schema:
+            items:
+              $ref: '#/definitions/dto.BookingEntity'
+            type: array
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      summary: Get entities for floor
+      tags:
+      - Entity
+  /admin/orders:
+    get:
+      description: Get orders with pagination and filters. Only for ADMINs.
+      parameters:
+      - description: Page
+        in: query
+        name: page
+        type: integer
+      - description: Size
+        in: query
+        name: size
+        type: integer
+      - description: Completed. Complteted must be 'true', 'false' or ''
+        in: query
+        name: completed
+        type: string
+      responses:
+        "200":
+          description: Succesfull get of orders
+          schema:
+            $ref: '#/definitions/dto.Orders'
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Invalid role
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      security:
+      - Bearer: []
+      summary: Get orders
+      tags:
+      - Orders
+  /admin/orders/{id}:
+    post:
+      description: Set order. Only for ADMINs
+      parameters:
+      - description: user id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "204":
+          description: Successful set order status
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      security:
+      - Bearer: []
+      summary: Set order completed
+      tags:
+      - Orders
+  /admin/orders/stats:
+    get:
+      description: Get stats of order creations. Only for ADMINs.
+      parameters:
+      - description: Filter
+        in: query
+        name: filter
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Stats'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      summary: Get stats
+      tags:
+      - Orders
+  /admin/verification/{id}/check:
+    get:
+      description: Returns user verification data. Only for ADMINs
+      parameters:
+      - description: User id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            $ref: '#/definitions/dto.VerificationData'
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Invalid role
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      security:
+      - Bearer: []
+      summary: Check verification
+      tags:
+      - Verification
+  /admin/verification/{id}/set:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Set user verification data. Only for ADMINs
+      parameters:
+      - description: User id
+        format: uuid
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: passport image
+        in: formData
+        name: passport
+        type: file
+      responses:
+        "204":
+          description: Successful setup of verification data.
+        "400":
+          description: Id must be uuid
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "401":
+          description: Unauth
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "403":
+          description: Invalid role
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+        "500":
+          description: Something going wrong...
+          schema:
+            $ref: '#/definitions/resp.JsonError'
+      security:
+      - Bearer: []
+      summary: Set verification
+      tags:
+      - Verification
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

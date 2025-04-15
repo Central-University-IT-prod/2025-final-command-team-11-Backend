@@ -1,0 +1,58 @@
+http_server:
+  url: ":80"
+  readTimeout: 5s
+  writeTimeout: 5s
+  shutdownTimeout: 5s
+
+logger:
+  type: "dev"
+  level: "debug"
+  add_source: true
+  is_json: true
+  set_default: true
+
+postgres:
+  migrations_run: true
+  migrations_path: "./migrations"
+  username: "admin"
+  host: "postgres"
+  port: 5432
+  dbname: "postgres"
+  sslmode: "disable"
+
+redis:
+  user: "admin"
+  host: "redis"
+  port: 6379
+  db: 0
+
+producer:
+  addrs:
+    - "broker:29092"
+
+usecase:
+  admin:
+    prefix: "http://admin:80/api/v1"
+    timeout: 5s
+  jwt:
+    issuer: "coffee-id-backend"
+    audience: ["coffee-id-frontend"]
+
+controller:
+  v1:
+    cookie:
+      name: "refreshToken"
+      age: 259200
+      path: "/"
+      host: "prod-team-11-78orvads.REDACTED"
+      secure: false
+      http_only: true
+    swagger:
+      version: "1.0"
+      base_path: "/api/v1/"
+      host: "localhost:8090"
+      schemes:
+        - "http"
+      title: "Coffee ID API"
+      description: "This is the API documentation for Coffee ID API."
+  mode: "DEBUG"

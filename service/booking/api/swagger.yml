@@ -1,0 +1,791 @@
+openapi: "3.0.3"
+info:
+  title: Booking API
+  version: "1.0"
+  description: |
+    API для управления бронированиями, заказами и нагрузкой на рабочие места.
+    Позволяет создавать, обновлять, удалять и просматривать бронирования, а также управлять заказами для каждого бронирования.
+
+servers:
+  - url: https://prod-team-11-78orvads.REDACTED/api/v1
+    description: prod
+  - url: http://localhost:8080/api/v1
+    description: Локальный сервер для разработки
+  - url: http://localhost:8080/api/v1/booking
+    description: Локальный API Gateway
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Bookings
+    description: Операции для управления бронированиями
+  - name: Orders
+    description: Операции для управления заказами
+  - name: Workloads
+    description: Операции для получения информации о нагрузке на рабочие места
+
+paths:
+  /bookings:
+    post:
+      tags:
+        - Bookings
+      summary: Создать бронирование
+      description: |
+        Создает новое бронирование для указанного рабочего места на заданный период времени.
+        В случае успеха возвращает созданное бронирование.
+      operationId: createBooking
+      x-ogen-operation-group: Bookings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingCreate"
+            example:
+              entity_id: "550e8400-e29b-41d4-a716-446655440000"
+              time_from: 1672502400
+              time_to: 1672506000
+      responses:
+        "200":
+          description: Бронирование успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                entity_id: "550e8400-e29b-41d4-a716-446655440000"
+                user_id: "550e8400-e29b-41d4-a716-446655440001"
+                time_from: 1672502400
+                time_to: 1672506000
+                created_at: 1672502400
+                updated_at: 1672502400
+        "400":
+          $ref: "#/components/responses/Response400"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "403":
+          description: "Нет свободных мест на указанное время"
+        "404":
+          $ref: "#/components/responses/Response404"
+        "409":
+          description: "Уже существует бронирование на указанное время"
+    get:
+      tags:
+        - Bookings
+      summary: Получить список всех бронирований (только для админа)
+      description: |
+        Возвращает список всех бронирований.
+      operationId: listAllBookings
+      x-ogen-operation-group: Bookings
+      responses:
+        "200":
+          description: Список бронирований
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BookingInfo"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "403":
+          description: недостаточно прав
+
+  /bookings/admin/{userId}:
+    parameters:
+      - name: userId
+        in: path
+        description: ID юзера
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - Bookings
+      summary: Создать бронирование
+      description: |
+        Создает новое бронирование для указанного рабочего места на заданный период времени.
+        В случае успеха возвращает созданное бронирование.
+      operationId: createBookingForAdmin
+      x-ogen-operation-group: Bookings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingCreate"
+            example:
+              entity_id: "550e8400-e29b-41d4-a716-446655440000"
+              time_from: 1672502400
+              time_to: 1672506000
+      responses:
+        "200":
+          description: Бронирование успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                entity_id: "550e8400-e29b-41d4-a716-446655440000"
+                user_id: "550e8400-e29b-41d4-a716-446655440001"
+                time_from: 1672502400
+                time_to: 1672506000
+                created_at: 1672502400
+                updated_at: 1672502400
+        "400":
+          $ref: "#/components/responses/Response400"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "403":
+          description: "Нет свободных мест на указанное время. или неверая роль"
+        "404":
+          $ref: "#/components/responses/Response404"
+        "409":
+          description: "Уже существует бронирование на указанное время"
+
+  /bookings/my:
+    get:
+      tags:
+        - Bookings
+      summary: Получить список моих бронирований
+      description: |
+        Возвращает список всех бронирований, созданных текущим пользователем.
+      operationId: listMyBookings
+      x-ogen-operation-group: Bookings
+      responses:
+        "200":
+          description: Список бронирований
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/BookingInfo"
+        "401":
+          $ref: "#/components/responses/Response401"
+
+  /bookings/{bookingId}:
+    parameters:
+      - name: bookingId
+        in: path
+        description: ID бронирования
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - Bookings
+      summary: Получить бронирование по ID
+      description: |
+        Возвращает информацию о бронировании по его уникальному идентификатору.
+      operationId: getBookingById
+      x-ogen-operation-group: Bookings
+      responses:
+        "200":
+          description: Бронирование найдено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookingInfo"
+        "400":
+          $ref: "#/components/responses/Response400"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "404":
+          $ref: "#/components/responses/Response404"
+
+    patch:
+      tags:
+        - Bookings
+      summary: Обновить бронирование по ID
+      description: |
+        Обновляет время начала и/или окончания бронирования.
+        В случае успеха возвращает обновленное бронирование.
+      operationId: updateBooking
+      x-ogen-operation-group: Bookings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookingUpdate"
+            example:
+              time_from: 1672502400
+              time_to: 1672506000
+      responses:
+        "200":
+          description: Бронирование успешно обновлено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Booking"
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                entity_id: "550e8400-e29b-41d4-a716-446655440000"
+                user_id: "550e8400-e29b-41d4-a716-446655440001"
+                time_from: 1672502400
+                time_to: 1672506000
+                created_at: 1672502400
+                updated_at: 1672502400
+        "400":
+          $ref: "#/components/responses/Response400"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "403":
+          description: "Нет свободных мест на указанное время"
+        "404":
+          $ref: "#/components/responses/Response404"
+        "409":
+          description: "Уже существует бронирование на указанное время"
+
+    delete:
+      tags:
+        - Bookings
+      summary: Удалить бронирование по ID
+      description: |
+        Удаляет бронирование по его уникальному идентификатору.
+      operationId: deleteBooking
+      x-ogen-operation-group: Bookings
+      responses:
+        "204":
+          description: Бронирование успешно удалено
+        "400":
+          $ref: "#/components/responses/Response400"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "404":
+          $ref: "#/components/responses/Response404"
+
+  /bookings/{bookingId}/orders:
+    parameters:
+      - name: bookingId
+        in: path
+        description: ID бронирования
+        required: true
+        schema:
+          type: string
+          format: uuid
+    post:
+      tags:
+        - Orders
+      summary: Создать заказ
+      description: |
+        Создает новый заказ для указанного бронирования.
+        В случае успеха возвращает созданный заказ.
+      operationId: createOrder
+      x-ogen-operation-group: Orders
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderCreate"
+            example:
+              thing: "laptop"
+      responses:
+        "200":
+          description: Заказ успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+              example:
+                id: "550e8400-e29b-41d4-a716-446655440000"
+                booking_id: "550e8400-e29b-41d4-a716-446655440000"
+                completed: false
+                thing: "laptop"
+                created_at: 1672502400
+                updated_at: 1672502400
+        "400":
+          $ref: "#/components/responses/Response400"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "404":
+          $ref: "#/components/responses/Response404"
+
+    get:
+      tags:
+        - Orders
+      summary: Получить список заказов
+      description: |
+        Возвращает список всех заказов для указанного бронирования.
+      operationId: listOrders
+      x-ogen-operation-group: Orders
+      responses:
+        "200":
+          description: Список заказов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+              example:
+                - id: "550e8400-e29b-41d4-a716-446655440000"
+                  booking_id: "550e8400-e29b-41d4-a716-446655440000"
+                  completed: false
+                  thing: "laptop"
+                  created_at: 1672502400
+                  updated_at: 1672502400
+        "400":
+          $ref: "#/components/responses/Response400"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "404":
+          $ref: "#/components/responses/Response404"
+
+  /bookings/{bookingId}/orders/{orderId}:
+    delete:
+      tags:
+        - Orders
+      summary: Удалить заказ
+      description: |
+        Удаляет заказ по его уникальному идентификатору.
+      operationId: deleteOrders
+      x-ogen-operation-group: Orders
+      parameters:
+        - name: bookingId
+          in: path
+          description: ID бронирования
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: orderId
+          in: path
+          required: true
+          description: ID заказа
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Заказ успешно удален
+        "400":
+          $ref: "#/components/responses/Response400"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "404":
+          $ref: "#/components/responses/Response404"
+
+  /workloads/{entityId}:
+    get:
+      tags:
+        - Workloads
+      summary: Получить нагрузку на рабочее место
+      description: |
+        Возвращает информацию о нагрузке на указанное рабочее место за указанный период времени.
+      operationId: getWorkload
+      x-ogen-operation-group: Workloads
+      parameters:
+        - name: entityId
+          in: path
+          description: ID рабочего места
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: timeFrom
+          in: query
+          required: true
+          description: Время начала периода (в секундах, Unix timestamp)
+          schema:
+            $ref: "#/components/schemas/Time"
+        - name: timeTo
+          in: query
+          required: true
+          description: Время окончания периода (в секундах, Unix timestamp)
+          schema:
+            $ref: "#/components/schemas/Time"
+      responses:
+        "200":
+          description: Информация о нагрузке
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Workload"
+              example:
+                - time: 1672502400
+                  is_free: true
+                - time: 1672506000
+                  is_free: false
+        "400":
+          $ref: "#/components/responses/Response400"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "404":
+          $ref: "#/components/responses/Response404"
+  /workloads/floors/{floorId}:
+    get:
+      tags:
+        - Workloads
+      summary: Получить нагрузку на этаж
+      description: |
+        Возвращает информацию о нагрузке на указанный этаж за указанный период времени.
+      operationId: getFloorWorkload
+      x-ogen-operation-group: Workloads
+      parameters:
+        - name: floorId
+          in: path
+          description: ID этажа
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: timeFrom
+          in: query
+          required: true
+          description: Время начала периода (в секундах, Unix timestamp)
+          schema:
+            $ref: "#/components/schemas/Time"
+        - name: timeTo
+          in: query
+          required: true
+          description: Время окончания периода (в секундах, Unix timestamp)
+          schema:
+            $ref: "#/components/schemas/Time"
+      responses:
+        "200":
+          description: Информация о нагрузке
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FloorWorkload"
+        "400":
+          $ref: "#/components/responses/Response400"
+        "401":
+          $ref: "#/components/responses/Response401"
+        "404":
+          $ref: "#/components/responses/Response404"
+
+components:
+  schemas:
+    Time:
+      type: integer
+      format: int64
+      description: Время в формате Unix timestamp (в секундах)
+
+    BookingEntity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum:
+            - ROOM
+            - OPEN_SPACE
+        title:
+          type: string
+        x:
+          type: integer
+        y:
+          type: integer
+        floor_id:
+          type: string
+          format: uuid
+        width:
+          type: integer
+        height:
+          type: integer
+        capacity:
+          type: integer
+        created_at:
+          $ref: "#/components/schemas/Time"
+        updated_at:
+          $ref: "#/components/schemas/Time"
+      required:
+        - id
+        - type
+        - title
+        - x
+        - y
+        - floor_id
+        - width
+        - height
+        - capacity
+        - created_at
+        - updated_at
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор пользователя
+        email:
+          type: string
+          description: Электронная почта пользователя
+        name:
+          type: string
+          description: Имя пользователя
+      required:
+        - id
+        - email
+        - name
+
+    BookingCreate:
+      type: object
+      properties:
+        entity_id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор рабочего места
+        time_from:
+          $ref: "#/components/schemas/Time"
+          description: Время начала бронирования (в секундах, Unix timestamp)
+        time_to:
+          $ref: "#/components/schemas/Time"
+          description: Время окончания бронирования (в секундах, Unix timestamp)
+      required:
+        - entity_id
+        - time_from
+        - time_to
+
+    BookingUpdate:
+      type: object
+      properties:
+        time_from:
+          $ref: "#/components/schemas/Time"
+          description: Новое время начала бронирования (в секундах, Unix timestamp)
+        time_to:
+          $ref: "#/components/schemas/Time"
+          description: Новое время окончания бронирования (в секундах, Unix timestamp)
+
+    BookingInfo:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор бронирования
+        entity:
+          $ref: "#/components/schemas/BookingEntity"
+        user:
+          $ref: "#/components/schemas/User"
+          description: Информация о пользователе, создавшем бронирование
+        time_from:
+          $ref: "#/components/schemas/Time"
+          description: Время начала бронирования (в секундах, Unix timestamp)
+        time_to:
+          $ref: "#/components/schemas/Time"
+          description: Время окончания бронирования (в секундах, Unix timestamp)
+        orders:
+          type: array
+          items:
+            $ref: "#/components/schemas/Order"
+          description: Список заказов, связанных с бронированием
+        created_at:
+          $ref: "#/components/schemas/Time"
+          description: Время создания бронирования (в секундах, Unix timestamp)
+        updated_at:
+          $ref: "#/components/schemas/Time"
+          description: Время последнего обновления бронирования (в секундах, Unix timestamp)
+      required:
+        - id
+        - user
+        - entity
+        - time_from
+        - time_to
+        - orders
+        - created_at
+        - updated_at
+      example:
+        id: "550e8400-e29b-41d4-a716-446655440000"
+        entity:
+          id: "550e8400-e29b-41d4-a716-446655440000"
+          type: "ROOM"
+          title: "booking entity title"
+          x: 42
+          y: 42
+          floor_id: 550e8400-e29b-41d4-a716-446655440000
+          width: 42
+          height: 42
+          capacity: 42
+          created_at: 1672502400
+          updated_at: 1672502400
+        user:
+          id: "550e8400-e29b-41d4-a716-446655440001"
+          email: "user@example.com"
+          name: "John Doe"
+          time_from: 1672502400
+          time_to: 1672506000
+        orders: []
+        created_at: 1672502400
+        updated_at: 1672502400
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор бронирования
+        entity_id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор рабочего места
+        user_id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор пользователя, создавшего бронирование
+        time_from:
+          $ref: "#/components/schemas/Time"
+          description: Время начала бронирования (в секундах, Unix timestamp)
+        time_to:
+          $ref: "#/components/schemas/Time"
+          description: Время окончания бронирования (в секундах, Unix timestamp)
+        created_at:
+          $ref: "#/components/schemas/Time"
+          description: Время создания бронирования (в секундах, Unix timestamp)
+        updated_at:
+          $ref: "#/components/schemas/Time"
+          description: Время последнего обновления бронирования (в секундах, Unix timestamp)
+      required:
+        - id
+        - user_id
+        - entity_id
+        - time_from
+        - time_to
+        - created_at
+        - updated_at
+
+    Workload:
+      type: array
+      items:
+        type: object
+        properties:
+          time:
+            $ref: "#/components/schemas/Time"
+            description: Временная метка (в секундах, Unix timestamp)
+          is_free:
+            type: boolean
+            description: Флаг, указывающий, свободно ли рабочее место в указанное время
+        required:
+          - time
+          - is_free
+
+    FloorWorkload:
+      type: array
+      items:
+        type: object
+        properties:
+          entity:
+            $ref: "#/components/schemas/BookingEntity"
+          is_free:
+            type: boolean
+            description: Флаг, указывающий, свободно ли рабочее место в указанное время
+        required:
+          - entity
+          - is_free
+      example:
+        - entity:
+            id: "550e8400-e29b-41d4-a716-446655440000"
+            type: "ROOM"
+            title: "booking entity title"
+            x: 42
+            y: 42
+            floor_id: 550e8400-e29b-41d4-a716-446655440000
+            width: 42
+            height: 42
+            capacity: 42
+            created_at: 1672502400
+            updated_at: 1672502400
+          is_free: true
+
+    OrderThingEnum:
+      type: string
+      enum:
+        - laptop
+        - eboard
+        - coffee
+      description: Заказ
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор заказа
+        booking_id:
+          type: string
+          format: uuid
+          description: Уникальный идентификатор бронирования, к которому относится заказ
+        completed:
+          type: boolean
+          description: Флаг, указывающий, выполнен ли заказ
+        thing:
+          $ref: "#/components/schemas/OrderThingEnum"
+          description: Заказ
+        created_at:
+          $ref: "#/components/schemas/Time"
+          description: Время создания заказа (в секундах, Unix timestamp)
+        updated_at:
+          $ref: "#/components/schemas/Time"
+          description: Время последнего обновления заказа (в секундах, Unix timestamp)
+      required:
+        - id
+        - booking_id
+        - completed
+        - thing
+        - created_at
+        - updated_at
+
+    OrderCreate:
+      type: object
+      properties:
+        thing:
+          $ref: "#/components/schemas/OrderThingEnum"
+          description: Заказ
+      required:
+        - thing
+
+  responses:
+    Response400:
+      description: "Некорректный запрос"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Сообщение об ошибке
+            example:
+              message: "Некорректные данные запроса"
+
+    Response401:
+      description: "Oшибка аутентификации"
+
+    Response404:
+      description: "Ресурс не найден"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              resource:
+                type: string
+                enum:
+                  - Floor
+                  - BookingEntity
+                  - Booking
+                  - Order
+                  - Guest
+                description: Тип ресурса, который не был найден
+            example:
+              resource: "Booking"
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

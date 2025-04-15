@@ -1,0 +1,172 @@
+services:
+  swagger:
+    container_name: swagger
+    image: swaggerapi/swagger-ui:latest
+    volumes:
+      - ../docs/swagger.yml:/docs/swagger.yml
+    restart: always
+    environment:
+      SWAGGER_JSON: /docs/swagger.yml
+
+  frontend:
+    image: REDACTED:5050/team-11/frontend/frontend
+    restart: always
+
+  postgres:
+    container_name: postgres
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "root"
+    ports:
+      - "REDACTED:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  postgres_admin:
+    container_name: postgres_admin
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: "admin"
+      POSTGRES_PASSWORD: "root"
+    ports:
+      - "REDACTED:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - pgdata_admin:/var/lib/postgresql/data
+
+  migrate:
+    image: migrate/migrate
+    container_name: migrate
+    volumes:
+      - ../service/booking/migrations:/migrations
+    entrypoint: >
+      migrate -path /migrations -database "REDACTED/postgres?sslmode=disable" up
+    depends_on:
+      postgres_admin:
+        condition: service_healthy
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+    restart: always
+    environment:
+      REDIS_PASSWORD: "root"
+      REDIS_USER: "admin"
+      REDIS_USER_PASSWORD: "root"
+      REDIS_DATABASES: 0
+    ports:
+      - "REDACTED:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "root", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    volumes:
+      - rsdata:/data
+
+  admin:
+    container_name: admin
+    image: REDACTED:5050/team-11/backend/admin
+    restart: always
+    depends_on:
+      postgres_admin:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      CONFIG_PATH: "config/docker.yaml"
+
+  booking:
+    container_name: booking
+    image: REDACTED:5050/team-11/backend/booking
+    restart: always
+    environment:
+      - COFFEE_ID_BASE_URL=http://coffee-id/api/v1
+      - POSTGRES_HOST=postgres_admin
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=postgres
+      - SERVER_PORT=80
+    depends_on:
+      postgres_admin:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  coffee-id:
+    container_name: coffee-id
+    environment:
+      CONFIG_PATH: "config/docker.yaml"
+    image: REDACTED:5050/team-11/backend/coffee-id
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    restart: always
+    volumes:
+      - minio:/data
+    environment:
+      MINIO_ROOT_USER: "admin"
+      MINIO_ROOT_PASSWORD: "rootroot"
+      MINIO_DEFAULT_BUCKETS: "advert_platform_files"
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  nginx:
+    container_name: nginx
+    image: nginx:stable-perl
+    restart: always
+    working_dir: /app
+    depends_on:
+      admin:
+        condition: service_started
+      booking:
+        condition: service_started
+      coffee-id:
+        condition: service_started
+    volumes:
+      - ../nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ../ssl:/ssl:ro
+    ports:
+      - 443:443
+      - 80:80
+
+volumes:
+  mongodb:
+  rsdata:
+  pgdata:
+  minio:
+  pgdata_admin:

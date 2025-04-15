@@ -1,0 +1,48 @@
+http_server:
+  url: ":80"
+  readTimeout: 5s
+  writeTimeout: 5s
+  shutdownTimeout: 5s
+
+logger:
+  type: "dev"
+  level: "debug"
+  add_source: true
+  is_json: true
+  set_default: true
+
+postgres:
+  migrations_run: false
+  migrations_path: "./migrations"
+  username: "admin"
+  host: "postgres_admin"
+  port: 5432
+  dbname: "postgres"
+  sslmode: "disable"
+
+storage:
+  minio:
+    address: "minio:9000"
+    user: "admin"
+    bucket: "passport"
+    use_ssl: false
+
+usecase:
+  coffee_id:
+    prefix: "http://coffee-id:80/api/v1"
+    timeout: 5s
+  jwt:
+    issuer: "coffee-id-backend"
+    audience: ["coffee-id-frontend"]
+
+controller:
+  v1:
+    swagger:
+      version: "1.0"
+      base_path: "/api/v1/"
+      host: "localhost:8070"
+      schemes:
+        - "http"
+      title: "admin"
+      description: "admin"
+  mode: "DEBUG"
